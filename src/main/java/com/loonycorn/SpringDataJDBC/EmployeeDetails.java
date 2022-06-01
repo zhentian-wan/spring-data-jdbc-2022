@@ -4,6 +4,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import javax.annotation.processing.Generated;
+
 @Table("EmployeeDetails")
 public class EmployeeDetails {
     @Id
@@ -17,20 +19,16 @@ public class EmployeeDetails {
     private String lastName;
 
     @Column("designation")
-    private String designation;
+    private int designation;
 
-    public EmployeeDetails() {
-        
-    }
-
-    public EmployeeDetails(final Integer employeeId, final String firstName, final String lastName, final String designation) {
+    public EmployeeDetails(Integer employeeId, final String firstName, final String lastName, final int designation) {
         this.employeeId = employeeId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.designation = designation;
     }
 
-    static EmployeeDetails create(Integer employeeId, String firstName, String lastName, String designation) {
+    static EmployeeDetails create(Integer employeeId, String firstName, String lastName, int designation) {
         return new EmployeeDetails(employeeId, firstName, lastName, designation);
     }
 
@@ -46,7 +44,7 @@ public class EmployeeDetails {
         return lastName;
     }
 
-    public String getDesignation() {
+    public int getDesignation() {
         return designation;
     }
 
@@ -62,7 +60,7 @@ public class EmployeeDetails {
         this.lastName = lastName;
     }
 
-    public void setDesignation(final String designation) {
+    public void setDesignation(final int designation) {
         this.designation = designation;
     }
 

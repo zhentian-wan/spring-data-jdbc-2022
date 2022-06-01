@@ -1,72 +1,71 @@
 package com.loonycorn.SpringDataJDBC;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.jdbc.core.JdbcTemplate;
-
-import java.util.List;
-import java.util.Optional;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
-public class SpringDataJdbcApplication implements CommandLineRunner {
-
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
-
-	@Autowired
-	private EmployeeDAOInterface<EmployeeDetails> empDAO;
+public class SpringDataJdbcApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpringDataJdbcApplication.class, args);
 	}
 
-	@Override
-	public void run(String... args) throws Exception {
-		EmployeeDetails employee = empDAO.getById(11023395).get();
-		EmployeeDetails newEmp = new EmployeeDetails(null, "Zhentian", "Wan", "Sr Staff Engineer");
-		empDAO.addNewEmployee(newEmp);
-		employee.setFirstName("ABC");
-		empDAO.updateEmployee(employee);
-		List<EmployeeDetails> employees = empDAO.list();
+	@Bean
+	ApplicationRunner designationRunner(DesignationDetailsRepository designationDetailsRepository) {
+		return args -> {
+			DesignationDetails desg1 = DesignationDetails.addDesignation(null, "Associate Software Egineer");
+			DesignationDetails desg2 = DesignationDetails.addDesignation(null, "Software Engineer");
+			designationDetailsRepository.save(desg1);
+			designationDetailsRepository.save(desg2);
 
-		for(EmployeeDetails row: employees) {
-			System.out.println(row.toString());
-		}
-
-		System.out.println("**** printed employee****"+ employee);
-
-
-
-
-		//printList(jdbcTemplate);
-
+			System.out.println(designationDetailsRepository.findAll());
+			System.out.println(designationDetailsRepository.findById(2L));
+		};
 	}
 
-	void insertData(JdbcTemplate jdbcTemplate) {
-		String insertQuery = "INSERT INTO EmployeeDetails VALUES(?,?, ?, ?);";
-		jdbcTemplate.update(insertQuery,  null,"James", "Powell", "Software Engineer");
-		jdbcTemplate.update(insertQuery,  null,"Abby", "Jonues", "Software Engineer");
-		jdbcTemplate.update(insertQuery,  null,"Kathy", "Cruz", "Senior Software Engineer");
+	@Bean
+	ApplicationRunner technologyRunner(TechnoloygDetailsRepository technoloygDetailsRepository) {
+		return args -> {
+			TechnologyDetails techJava = TechnologyDetails.addTech(null, "Java");
+			technoloygDetailsRepository.save(techJava);
+			TechnologyDetails techPython = TechnologyDetails.addTech(null, "Python");
+			technoloygDetailsRepository.save(techPython);
+			TechnologyDetails techAzure = TechnologyDetails.addTech(null, "Azure");
+			technoloygDetailsRepository.save(techAzure);
+		};
+	}
+	@Bean
+	ApplicationRunner applicationRunner(EmployeeDetailsRepository employeeDetailsRepository) {
+		return args -> {
+
+
+			EmployeeDetails employee1 = EmployeeDetails.create(null, "Rachel", "Black", 1);
+			EmployeeDetails employee2 = EmployeeDetails.create(null, "Naomi", "Sears", 2);
+
+			System.out.println(employeeDetailsRepository.save(employee1));
+			System.out.println(employeeDetailsRepository.save(employee2));
+		};
 	}
 
-	void updateAndDelete(JdbcTemplate jdbcTemplate) {
-		String updateQuery = "UPDATE EmployeeDetails SET designation = ? WHERE employeeId = ?";
-		jdbcTemplate.update(updateQuery, "Staff Engineer", 11023396);
 
-		printList(jdbcTemplate);
 
-		String deleteQuery = "DELETE from EmployeeDetails WHERE employeeId = ?";
-		jdbcTemplate.update(deleteQuery, 11023394);
+
+
+	@Bean
+	ApplicationRunner empTechRunner(EmployeeTechnologyRepository employeeTechnologyRepository) {
+		return args -> {
+			Long technologyId = employeeTechnologyRepository.findTechnologyByName("Java").getTechnologyId();
+			Integer employeeId = employeeTechnologyRepository.findEmployeeByName("Naomi", "Sears").getEmployeeId();
+
+			EmployeeTechnology empTech = new EmployeeTechnology();
+			empTech.setEmployeeId(employeeId);
+			empTech.setTechnologyId(technologyId);
+
+			employeeTechnologyRepository.save(empTech);
+
+		};
 	}
 
-	void printList(JdbcTemplate jdbcTemplate) {
-		String query = "SELECT * FROM EmployeeDetails";
-		List employeeList = jdbcTemplate.queryForList(query);
-		for (Object emp: employeeList) {
-			System.out.println(emp.toString());
-		}
-		System.out.println("#############");
-	}
 }
